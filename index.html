@@ -241,6 +241,40 @@ header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1p
 .mact .del{color:var(--danger);border-color:var(--danger-line)}
 .mact .close{background:var(--btn-bg);color:#fff;border-color:transparent;box-shadow:0 4px 14px var(--glow)}
 
+/* ---- 궁합 ---- */
+.sections.pair{grid-template-columns:1fr}
+.pairlist{padding:13px 15px 17px;display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
+.pcard{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.6);border-radius:16px;cursor:pointer;text-align:left;transition:.16s;font-family:inherit}
+.pcard:hover{border-color:var(--accent);box-shadow:0 5px 16px var(--glow-soft);transform:translateY(-1px)}
+.pfaces{position:relative;width:62px;height:40px;flex:0 0 auto}
+.pfaces span{position:absolute;top:0;width:40px;height:40px;border-radius:50%;border:2px solid #fff;
+  background-color:var(--avatar-bg);background-repeat:no-repeat;box-shadow:0 2px 7px var(--glow-soft)}
+.pfaces span:nth-child(1){left:0}
+.pfaces span:nth-child(2){left:22px}
+.pmeta{min-width:0;flex:1}
+.pmeta .pn{display:block;font-size:12px;font-weight:700;line-height:1.35;word-break:keep-all;color:var(--ink)}
+.pmeta .pl{display:block;font-size:11px;color:var(--sub);margin-top:2px}
+.pscore{font-size:19px;font-weight:800;margin-left:auto;color:var(--accent-ink)}
+.matrixwrap{padding:8px 15px 17px;overflow-x:auto}
+table.mx{border-collapse:separate;border-spacing:3px;font-size:11px}
+table.mx th{font-weight:600;color:var(--ink-2)}
+table.mx th.rowh{text-align:right;padding-right:6px;max-width:96px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+table.mx th.colh{writing-mode:vertical-rl;text-orientation:mixed;height:78px;padding-bottom:4px;
+  vertical-align:bottom;white-space:nowrap}
+table.mx td{width:31px;height:27px;text-align:center;border-radius:8px;font-weight:700;cursor:pointer;transition:.12s}
+table.mx td:hover{outline:2px solid var(--ink);outline-offset:-2px}
+table.mx td.self{background:var(--field);color:var(--faint);cursor:default}
+table.mx td.self:hover{outline:none}
+.ptop{display:flex;align-items:center;justify-content:center;gap:14px}
+.ptop .f{width:86px;height:86px;border-radius:50%;border:3px solid #fff;background-color:var(--avatar-bg);
+  background-repeat:no-repeat;box-shadow:0 4px 14px var(--glow-mid)}
+.ptop .x{font-size:19px;font-weight:800;color:var(--sub)}
+.pnames{text-align:center;font-size:14px;font-weight:700;margin-top:12px;word-break:keep-all}
+.pbig{text-align:center;margin:10px 0 0;font-size:42px;font-weight:800;line-height:1}
+.plabel{text-align:center;font-size:15px;font-weight:800;margin-top:4px}
+
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
   background:var(--toast-bg);color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;font-weight:600;
   box-shadow:0 8px 26px var(--glow-mid);opacity:0;pointer-events:none;transition:.25s;z-index:60}
@@ -294,6 +328,7 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
       <div class="tabs">
         <button data-view="expr" class="on">^^ / ㅍㅍ상</button>
         <button data-view="animal">동물상</button>
+        <button data-view="pair">궁합</button>
       </div>
       <div class="tools">
         <button class="tool" id="reanalyzeBtn">전체 다시 분석</button>
@@ -323,6 +358,14 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
       <button class="del" id="mDel">삭제</button>
       <button class="close" id="mClose">닫기</button>
     </div>
+  </div>
+</div>
+
+<div class="mask" id="pmask">
+  <div class="modal" style="max-width:400px">
+    <div class="ptop" id="pTop"></div>
+    <div id="pBody"></div>
+    <div class="mact"><button class="close" id="pClose">닫기</button></div>
   </div>
 </div>
 
@@ -804,6 +847,7 @@ function groupsFor(v){
     : ANIMALS.map(t=>({key:t.k, name:t.n, emo:t.e, color:t.c, list:chars.filter(c=>c.animal===t.k)}));
 }
 function renderBoard(){
+  if(view==='pair'){ renderPairs(); return; }
   const wrap=$('#sections');
   wrap.className='sections '+(view==='expr'?'two':'four');
   wrap.innerHTML='';
@@ -1018,6 +1062,228 @@ function armDelete(btn,label){
   clearTimeout(delTimer); delTimer=setTimeout(disarmDelete,3000);
 }
 
+/* ===================== 얼굴궁합 ===================== */
+/* 동물상 상성표 — 결이 다른 조합(순한 쪽 × 날선 쪽)이 높고,
+   같은 결끼리는 무난, 완전히 같은 상은 닮은꼴이라 낮다. 대칭이다. */
+const AFFINITY = {
+  dog:   {dog:74, cat:95, fox:82, bear:78, rabbit:88, deer:80, wolf:90, dino:84},
+  cat:   {dog:95, cat:68, fox:70, bear:92, rabbit:85, deer:76, wolf:72, dino:86},
+  fox:   {dog:82, cat:70, fox:66, bear:90, rabbit:87, deer:74, wolf:80, dino:78},
+  bear:  {dog:78, cat:92, fox:90, bear:72, rabbit:91, deer:86, wolf:82, dino:88},
+  rabbit:{dog:88, cat:85, fox:87, bear:91, rabbit:70, deer:82, wolf:89, dino:80},
+  deer:  {dog:80, cat:76, fox:74, bear:86, rabbit:82, deer:71, wolf:88, dino:75},
+  wolf:  {dog:90, cat:72, fox:80, bear:82, rabbit:89, deer:88, wolf:65, dino:79},
+  dino:  {dog:84, cat:86, fox:78, bear:88, rabbit:80, deer:75, wolf:79, dino:73}
+};
+/* 점수는 구조상 58~98 구간에 모인다. 등급은 그 실제 분포에 맞춰 끊었다 */
+const PAIR_GRADES = [
+  {min:90, n:'천생연분'},
+  {min:84, n:'찰떡궁합'},
+  {min:77, n:'좋은 짝'},
+  {min:70, n:'무난한 사이'},
+  {min:0,  n:'각자 노는 사이'}
+];
+const pairGrade = t => PAIR_GRADES.find(g=>t>=g.min).n;
+
+/* 저장된 측정값을 정규화 벡터로 (판정에 쓰는 것과 같은 기준) */
+function fvec(c){
+  const f=c.feat||{};
+  return [
+    clamp(((f.eyeAR!==undefined?f.eyeAR:0.58)-0.58)/0.28),
+    clamp(((f.upturn!==undefined?f.upturn:0))/0.13),
+    clamp((0.80-(f.jawTaper!==undefined?f.jawTaper:0.80))/0.22),
+    clamp(((f.faceRatio!==undefined?f.faceRatio:1.10)-1.10)/0.30),
+    clamp((((f.eyeArea!==undefined?f.eyeArea:5.5)/100)-0.055)/0.045),
+    clamp(((f.mouthW!==undefined?f.mouthW:0.40)-0.40)/0.14)
+  ];
+}
+function pairScore(a,b){
+  const aff = (AFFINITY[a.animal] && AFFINITY[a.animal][b.animal]) || 75;
+
+  /* 표정: ^^ 지수 차이가 클수록 대비가 좋고, 둘 다 웃는상이면 덤 */
+  const gap = Math.abs((a.smilePct||50)-(b.smilePct||50));
+  let expr = 66 + 30*Math.pow(gap/100, 0.65);
+  if(a.expr==='smile' && b.expr==='smile') expr += 8;
+  expr = Math.max(0, Math.min(100, expr));
+
+  /* 이목구비: 너무 닮아도, 너무 달라도 아쉽다. 적당한 차이에서 최고 */
+  const va=fvec(a), vb=fvec(b);
+  let d=0; for(let i=0;i<va.length;i++) d+=Math.abs(va[i]-vb[i]);
+  d/=va.length;
+  const balance = 100*Math.exp(-Math.pow(d-0.55,2)/(2*0.55*0.55));
+
+  const total = Math.round(0.45*aff + 0.25*expr + 0.30*balance);
+  return {total, aff, expr:Math.round(expr), balance:Math.round(balance), d:+d.toFixed(2), gap:Math.round(gap)};
+}
+function pairComment(a,b,s){
+  const p=[];
+  if(s.aff>=88) p.push(AMAP[a.animal].n+'과 '+AMAP[b.animal].n+'은 결이 달라서 서로를 살려주는 조합이에요');
+  else if(s.aff<=70) p.push('둘 다 '+(a.animal===b.animal?AMAP[a.animal].n+'이라 거의 닮은꼴':'비슷한 결이라 자극은 적은 편')+'이에요');
+  if(a.expr!==b.expr) p.push('웃는상과 까칠한상이 만나 분위기 대비가 확실해요');
+  else if(s.gap>=40) p.push('둘 다 '+EMAP[a.expr].n+'이지만 웃음기 정도가 달라서 밋밋하진 않아요');
+  else if(a.expr==='smile') p.push('둘 다 웃는상이라 같이 있으면 공기가 편해요');
+  else p.push('둘 다 서늘한 인상이라 조용히 잘 맞아요');
+  if(s.d<0.28) p.push('이목구비 수치까지 겹쳐서 남매상에 가까워요');
+  else if(s.d>0.95) p.push('이목구비가 많이 달라서 취향이 갈릴 수 있어요');
+  else if(s.balance>=88) p.push('적당히 닮고 적당히 달라서 나란히 두면 잘 어울려요');
+  return p.length? p.join('. ')+'.' : '무난하게 어울리는 조합이에요.';
+}
+function allPairs(){
+  const out=[];
+  for(let i=0;i<chars.length;i++)
+    for(let j=i+1;j<chars.length;j++)
+      out.push({a:chars[i], b:chars[j], s:pairScore(chars[i],chars[j])});
+  return out.sort((x,y)=>y.s.total-x.s.total);
+}
+function accentRGB(){
+  const v=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  const m=/^#([0-9a-fA-F]{6})$/.exec(v);
+  if(!m) return [234,138,185];
+  const n=parseInt(m[1],16);
+  return [(n>>16)&255,(n>>8)&255,n&255];
+}
+function cellStyle(total,rgb){
+  const al=Math.max(0.07, Math.min(1,(total-58)/34));
+  return 'background:rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+al.toFixed(2)+');color:'+
+         (al>0.52 ? '#fff' : 'var(--ink)');
+}
+
+function renderPairs(){
+  const wrap=$('#sections');
+  wrap.className='sections pair';
+  if(chars.length<2){
+    wrap.innerHTML='<div class="sec"><div class="body"><div class="empty">'+
+      '얼굴을 2명 이상 넣으면 궁합을 볼 수 있어요</div></div></div>';
+    return;
+  }
+  const pairs=allPairs();
+  const rgb=accentRGB();
+
+  let html='<div class="sec"><div class="sh" style="background:var(--accent)">'+
+    '<span class="emo">💞</span><span class="nm">베스트 궁합</span>'+
+    '<span class="cnt">'+pairs.length+'쌍</span></div><div class="pairlist">';
+  pairs.slice(0,8).forEach(p=>{
+    html+='<button class="pcard" data-a="'+p.a.id+'" data-b="'+p.b.id+'">'+
+      '<span class="pfaces"><span style="'+cropCss(p.a)+'"></span><span style="'+cropCss(p.b)+'"></span></span>'+
+      '<span class="pmeta"><span class="pn">'+escapeHtml(p.a.name)+' × '+escapeHtml(p.b.name)+'</span>'+
+      '<span class="pl">'+pairGrade(p.s.total)+'</span></span>'+
+      '<span class="pscore">'+p.s.total+'</span></button>';
+  });
+  html+='</div></div>';
+
+  if(chars.length<=30){
+    html+='<div class="sec"><div class="sh" style="background:var(--accent-ink)">'+
+      '<span class="emo">🔢</span><span class="nm">전체 궁합표</span></div>'+
+      '<div class="matrixwrap"><table class="mx"><tr><th></th>';
+    chars.forEach(c=>{ html+='<th class="colh">'+escapeHtml(c.name)+'</th>'; });
+    html+='</tr>';
+    chars.forEach(a=>{
+      html+='<tr><th class="rowh">'+escapeHtml(a.name)+'</th>';
+      chars.forEach(b=>{
+        if(a.id===b.id){ html+='<td class="self">·</td>'; return; }
+        const t=pairScore(a,b).total;
+        html+='<td data-a="'+a.id+'" data-b="'+b.id+'" style="'+cellStyle(t,rgb)+'">'+t+'</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</table></div></div>';
+  } else {
+    html+='<div class="sec"><div class="body"><div class="empty">'+
+      '캐릭터가 30명을 넘어 표는 생략했어요 (베스트 궁합은 전부 계산됨)</div></div></div>';
+  }
+  wrap.innerHTML=html;
+
+  wrap.querySelectorAll('[data-a][data-b]').forEach(el2=>{
+    el2.addEventListener('click',()=>openPairModal(el2.dataset.a, el2.dataset.b));
+  });
+}
+
+function openPairModal(ida,idb){
+  const a=chars.find(c=>c.id===ida), b=chars.find(c=>c.id===idb);
+  if(!a||!b) return;
+  const s=pairScore(a,b);
+  $('#pTop').innerHTML='<span class="f" style="'+cropCss(a)+'"></span>'+
+    '<span class="x">×</span><span class="f" style="'+cropCss(b)+'"></span>';
+  const rows=[
+    ['동물상 상성', s.aff, AMAP[a.animal].e+' '+AMAP[a.animal].n+' × '+AMAP[b.animal].e+' '+AMAP[b.animal].n],
+    ['표정 조합',   s.expr, EMAP[a.expr].n+' × '+EMAP[b.expr].n+' (^^ 지수 차이 '+s.gap+')'],
+    ['이목구비 밸런스', s.balance, '수치 차이 '+s.d+' — '+(s.d<0.28?'거의 닮은꼴':s.d>0.95?'많이 다름':'적당히 다름')]
+  ];
+  $('#pBody').innerHTML=
+    '<div class="pnames">'+escapeHtml(a.name)+' × '+escapeHtml(b.name)+'</div>'+
+    '<div class="pbig" style="color:var(--accent-ink)">'+s.total+'</div>'+
+    '<div class="plabel" style="color:var(--accent-ink)">'+pairGrade(s.total)+'</div>'+
+    '<div class="sub">점수 구성</div>'+
+    rows.map(r=>'<div class="bar"><div class="l"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'+
+      '<div class="t"><div class="f" style="width:'+r[1]+'%;background:var(--accent)"></div></div>'+
+      '<div style="font-size:11px;color:var(--sub);margin-top:3px">'+escapeHtml(r[2])+'</div></div>').join('')+
+    '<div class="sub">한 줄 평</div><div class="desc">'+escapeHtml(pairComment(a,b,s))+'</div>';
+  $('#pmask').classList.add('on');
+}
+function closePairModal(){ $('#pmask').classList.remove('on'); }
+
+/* 궁합 탭 PNG 내보내기 — 상위 쌍을 카드로 */
+async function exportPairsPNG(){
+  const pairs=allPairs().slice(0,12);
+  if(!pairs.length){ toast('얼굴을 2명 이상 넣어주세요'); return; }
+  const T=EXPORT_THEME[theme]||EXPORT_THEME.baekco;
+  const W=1200, PAD=40, COL=(W-PAD*2-30)/2, CH=104, AV=68;
+  const rows=Math.ceil(pairs.length/2);
+  const H=PAD+62+rows*(CH+14)+PAD;
+
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle=T.bg; ctx.fillRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,T.g0); grad.addColorStop(0.5,T.g1); grad.addColorStop(1,T.g2);
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,8);
+  ctx.textBaseline='middle';
+  ctx.fillStyle=T.ink; ctx.font='700 29px "Malgun Gothic",sans-serif'; ctx.textAlign='left';
+  ctx.fillText('얼굴궁합', PAD, PAD+16);
+  const tw=ctx.measureText('얼굴궁합').width;
+  ctx.fillStyle=T.sub; ctx.font='500 20px "Malgun Gothic",sans-serif';
+  ctx.fillText('@whitecotchi', PAD+tw+10, PAD+18);
+  ctx.fillStyle=T.dim; ctx.font='15px "Malgun Gothic",sans-serif'; ctx.textAlign='right';
+  ctx.fillText('상위 '+pairs.length+'쌍 / 전체 '+allPairs().length+'쌍', W-PAD, PAD+18);
+
+  const imgs={};
+  await Promise.all(chars.filter(c=>c.src).map(async c=>{ imgs[c.id]=await loadImg(c.src); }));
+
+  pairs.forEach((p,i)=>{
+    const ox=PAD+(i%2)*(COL+30), oy=PAD+62+Math.floor(i/2)*(CH+14);
+    ctx.fillStyle='rgba(255,255,255,.72)';
+    roundRect(ctx,ox,oy,COL,CH,18); ctx.fill();
+    [p.a,p.b].forEach((c,k)=>{
+      const cx=ox+22+AV/2+k*(AV-16), cy=oy+CH/2;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,AV/2,0,Math.PI*2);
+      ctx.fillStyle='#fff'; ctx.shadowColor=T.shadow; ctx.shadowBlur=8; ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,AV/2-3,0,Math.PI*2); ctx.clip();
+      const im=imgs[c.id], r=cropRect(c);
+      if(im) ctx.drawImage(im,r.sx,r.sy,r.side,r.side,cx-AV/2+3,cy-AV/2+3,AV-6,AV-6);
+      else { ctx.fillStyle=T.ph; ctx.fillRect(cx-AV/2,cy-AV/2,AV,AV); }
+      ctx.restore();
+    });
+    const tx=ox+22+AV*2-4;
+    ctx.textAlign='left'; ctx.fillStyle=T.ink; ctx.font='700 17px "Malgun Gothic",sans-serif';
+    let nm=p.a.name+' × '+p.b.name;
+    while(ctx.measureText(nm).width>COL-tx+ox-104 && nm.length>3) nm=nm.slice(0,-1);
+    ctx.fillText(nm, tx, oy+CH/2-11);
+    ctx.fillStyle=T.dim; ctx.font='600 13px "Malgun Gothic",sans-serif';
+    ctx.fillText(pairGrade(p.s.total), tx, oy+CH/2+12);
+    ctx.textAlign='right'; ctx.fillStyle=T.ink; ctx.font='800 30px "Malgun Gothic",sans-serif';
+    ctx.fillText(String(p.s.total), ox+COL-22, oy+CH/2);
+  });
+
+  const a=document.createElement('a');
+  a.download='physiognomy-pair.png';
+  a.href=cv.toDataURL('image/png');
+  a.click();
+  toast('이미지를 저장했어요');
+}
+
 /* ===================== PNG 내보내기 ===================== */
 function roundRect(ctx,x,y,w,h,r){
   ctx.beginPath();
@@ -1048,6 +1314,7 @@ function drawChip(ctx,c,im,cx,cy,AV,CELL){
 }
 async function exportPNG(){
   if(!chars.length){ toast('먼저 사진을 넣어주세요'); return; }
+  if(view==='pair'){ await exportPairsPNG(); return; }
   const groups=groupsFor(view).filter(g=>g.list.length);
   const W=1200, PAD=40, AV=104, ROW=AV+46;
   const two = view==='expr';
@@ -1184,6 +1451,8 @@ $('#clearBtn').addEventListener('click',e=>{
   disarmDelete(); chars=[]; save(); renderBoard(); toast('보드를 비웠어요');
 });
 
+$('#pClose').addEventListener('click',closePairModal);
+$('#pmask').addEventListener('click',e=>{ if(e.target===$('#pmask')) closePairModal(); });
 $('#mClose').addEventListener('click',closeModal);
 $('#mask').addEventListener('click',e=>{ if(e.target===$('#mask')) closeModal(); });
 $('#mDel').addEventListener('click',e=>{
@@ -1202,6 +1471,7 @@ $('#mPick').addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(document.activeElement && document.activeElement.id==='mName'){ document.activeElement.blur(); return; }
+    if($('#pmask').classList.contains('on')){ closePairModal(); return; }
     closeModal();
   }
 });

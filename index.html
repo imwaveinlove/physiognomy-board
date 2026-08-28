@@ -9,32 +9,77 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon/icon-180.png">
 <meta name="theme-color" content="#f7c4de">
 <style>
+/* ─── 색상 모드 ────────────────────────────────────────────
+   백코(연분홍)가 기본값이라 스크립트가 돌기 전에도 그대로 그려진다.
+   블루밍(하늘색~파스텔 민트)은 data-theme으로 덮어쓴다. */
 :root{
-  --ink:#5c4462; --sub:#a691b4;
-  --line:#f3dfeb; --line2:#ecd8f0;
-  --accent:#ea8ab9; --accent2:#b4a3ea;
-  --glass:rgba(255,255,255,.68);
-  --shadow:0 8px 28px rgba(196,134,175,.16);
-  --shadow-sm:0 3px 12px rgba(196,134,175,.14);
+  --ink:#5c4462; --ink-2:#8a748f; --sub:#a691b4; --faint:#c9b3d2;
+  --line:#f3dfeb; --line-2:#ecd8f0;
+  --accent:#ea8ab9; --accent-2:#b4a3ea; --accent-ink:#c95f96;
+  --glass:rgba(255,255,255,.68); --glass-line:rgba(255,255,255,.8);
+  --field:rgba(253,241,248,.72);
+  --avatar-bg:#f7ebf3;
+  --body-bg:linear-gradient(165deg,#fdf1f8 0%,#f9eefc 42%,#eff1fe 100%);
+  --header-bg:linear-gradient(112deg,#f9bad8 0%,#e9b3ec 46%,#bfc6f6 100%);
+  --haze-1:#f9bcd9; --haze-2:#c9b6f5; --haze-3:#b9d4f7; --haze-4:#fad3c4;
+  --btn-bg:linear-gradient(110deg,#f29ec6,#b8a6ec);
+  --meter-bg:linear-gradient(90deg,#9b8fc7,#efe4f2,#f4a8c8);
+  --needle:#5c4462;
+  --mask-bg:rgba(92,58,96,.42);
+  --toast-bg:rgba(92,68,98,.94);
+  --glow:rgba(226,130,180,.36);
+  --glow-soft:rgba(196,134,175,.16);
+  --glow-mid:rgba(196,134,175,.34);
+  --header-glow:rgba(214,140,190,.30);
+  --title-shadow:rgba(170,90,140,.28);
+  --logo-shadow:rgba(150,70,120,.35);
+  --danger:#e2718f; --danger-line:#f6d7e0;
+  --shadow:0 8px 28px var(--glow-soft);
+  --shadow-sm:0 3px 12px var(--glow-soft);
   --radius:22px;
 }
+/* 블루밍 — 하늘색에서 파스텔 민트로 */
+:root[data-theme="blooming"]{
+  --ink:#17414d; --ink-2:#3d6f7e; --sub:#7fa7b3; --faint:#a9ccd6;
+  --line:#d3ebf3; --line-2:#dff2f6;
+  --accent:#3aaecd; --accent-2:#61c9b4; --accent-ink:#1a8aa8;
+  --glass:rgba(255,255,255,.66); --glass-line:rgba(255,255,255,.82);
+  --field:rgba(238,251,254,.78);
+  --avatar-bg:#e4f2f7;
+  --body-bg:linear-gradient(165deg,#f3fcfe 0%,#dff0fa 44%,#dcf6ee 100%);
+  --header-bg:linear-gradient(112deg,#8ed3ee 0%,#79cfd9 46%,#a7e5cd 100%);
+  --haze-1:#a8dcf2; --haze-2:#9fe0d8; --haze-3:#b6d6f5; --haze-4:#c9f0e2;
+  --btn-bg:linear-gradient(110deg,#4bb8d6,#63cdb6);
+  --meter-bg:linear-gradient(90deg,#6f9fc4,#e9f5f8,#7ed9c6);
+  --needle:#17414d;
+  --mask-bg:rgba(20,62,74,.42);
+  --toast-bg:rgba(21,62,73,.94);
+  --glow:rgba(60,165,195,.34);
+  --glow-soft:rgba(60,140,170,.16);
+  --glow-mid:rgba(60,140,170,.32);
+  --header-glow:rgba(70,165,195,.30);
+  --title-shadow:rgba(20,95,120,.26);
+  --logo-shadow:rgba(20,85,110,.32);
+  --danger:#dd6b83; --danger-line:#f3d6dc;
+}
+
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
   min-height:100vh; color:var(--ink);
-  background:linear-gradient(165deg,#fdf1f8 0%,#f9eefc 42%,#eff1fe 100%);
-  background-attachment:fixed;
+  background:var(--body-bg); background-attachment:fixed;
   font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
   letter-spacing:-.2px; -webkit-font-smoothing:antialiased;
+  transition:color .25s;
 }
 /* 몽환적인 배경 안개 */
 .haze{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .haze i{position:absolute;display:block;border-radius:50%;filter:blur(78px);opacity:.52;
-  animation:drift 26s ease-in-out infinite alternate}
-.haze i:nth-child(1){width:44vw;height:44vw;left:-8vw;top:-6vw;background:#f9bcd9}
-.haze i:nth-child(2){width:38vw;height:38vw;right:-6vw;top:8vh;background:#c9b6f5;animation-delay:-7s}
-.haze i:nth-child(3){width:42vw;height:42vw;left:22vw;bottom:-14vw;background:#b9d4f7;animation-delay:-14s}
-.haze i:nth-child(4){width:26vw;height:26vw;right:14vw;bottom:4vh;background:#fad3c4;animation-delay:-20s}
+  animation:drift 26s ease-in-out infinite alternate;transition:background-color .35s}
+.haze i:nth-child(1){width:44vw;height:44vw;left:-8vw;top:-6vw;background-color:var(--haze-1)}
+.haze i:nth-child(2){width:38vw;height:38vw;right:-6vw;top:8vh;background-color:var(--haze-2);animation-delay:-7s}
+.haze i:nth-child(3){width:42vw;height:42vw;left:22vw;bottom:-14vw;background-color:var(--haze-3);animation-delay:-14s}
+.haze i:nth-child(4){width:26vw;height:26vw;right:14vw;bottom:4vh;background-color:var(--haze-4);animation-delay:-20s}
 @keyframes drift{
   from{transform:translate3d(0,0,0) scale(1)}
   to{transform:translate3d(3vw,-4vh,0) scale(1.14)}
@@ -45,130 +90,143 @@ button{font-family:inherit;cursor:pointer;letter-spacing:-.2px}
 input,select{font-family:inherit;letter-spacing:-.2px}
 
 header{
-  background:linear-gradient(112deg,#f9bad8 0%,#e9b3ec 46%,#bfc6f6 100%);
-  color:#fff;padding:26px 20px 22px;text-align:center;
-  box-shadow:0 6px 34px rgba(214,140,190,.30);
+  background:var(--header-bg); color:#fff;padding:26px 20px 20px;text-align:center;
+  box-shadow:0 6px 34px var(--header-glow); transition:background .3s;
 }
 header .brand{display:flex;align-items:center;justify-content:center;gap:11px}
 header .brand img{width:42px;height:42px;image-rendering:pixelated;
-  filter:drop-shadow(0 2px 6px rgba(150,70,120,.35))}
-header h1{margin:0;font-size:25px;text-shadow:0 2px 10px rgba(170,90,140,.28)}
+  filter:drop-shadow(0 2px 6px var(--logo-shadow))}
+header h1{margin:0;font-size:25px;text-shadow:0 2px 10px var(--title-shadow)}
 header h1 span{opacity:.85;font-weight:500;font-size:19px}
-header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1px 6px rgba(170,90,140,.25)}
+header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1px 6px var(--title-shadow)}
+
+/* 색상 모드 스위치 */
+.seg{display:inline-flex;margin-top:13px;gap:3px;padding:3px;border-radius:22px;
+  background:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.55);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.seg button{padding:6px 17px;border:0;background:transparent;border-radius:18px;
+  font-size:12.5px;font-weight:700;color:rgba(255,255,255,.92);transition:.16s}
+.seg button:hover{background:rgba(255,255,255,.22)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--accent-ink);
+  box-shadow:0 2px 8px rgba(0,0,0,.12)}
 
 .wrap{max-width:1240px;margin:0 auto;padding:22px 18px 70px;display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
 @media(max-width:960px){.wrap{grid-template-columns:1fr}}
-.card{background:var(--glass);border:1px solid rgba(255,255,255,.8);border-radius:var(--radius);
+.card{background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--radius);
   box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.25);-webkit-backdrop-filter:blur(14px) saturate(1.25)}
 .panel{padding:18px}
 .panel h2{margin:0 0 12px;font-size:16.5px}
 
 /* ---- 업로드 ---- */
-.drop{border:2px dashed #f0bcd8;border-radius:18px;background:rgba(255,255,255,.5);padding:26px 16px;text-align:center;transition:.18s}
-.drop.over{border-color:var(--accent);background:rgba(255,232,244,.85);box-shadow:0 0 0 5px rgba(234,138,185,.14)}
-.drop .ic{font-size:40px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 3px 8px rgba(214,140,190,.35))}
+.drop{border:2px dashed var(--line);border-radius:18px;background:rgba(255,255,255,.5);padding:26px 16px;text-align:center;transition:.18s}
+.drop.over{border-color:var(--accent);background:var(--field);box-shadow:0 0 0 5px var(--glow-soft)}
+.drop .ic{font-size:40px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 3px 8px var(--glow-mid))}
 .drop > b{display:block;font-size:14.5px;margin-bottom:4px}
-.drop small b{color:#8a748f;font-weight:700}
+.drop small b{color:var(--ink-2);font-weight:700}
 .drop small{display:block;color:var(--sub);font-size:12px;line-height:1.6}
-.btn-file{margin-top:12px;background:linear-gradient(110deg,#f29ec6,#b8a6ec);border:none;color:#fff;
+.btn-file{margin-top:12px;background:var(--btn-bg);border:none;color:#fff;
   border-radius:14px;padding:10px 22px;font-size:13.5px;font-weight:700;
-  box-shadow:0 4px 14px rgba(226,130,180,.36);transition:.16s}
-.btn-file:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(226,130,180,.44)}
+  box-shadow:0 4px 14px var(--glow);transition:.16s}
+.btn-file:hover{transform:translateY(-1px);box-shadow:0 7px 20px var(--glow)}
 
-.hint{margin-top:14px;background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:15px;
-  padding:12px 14px;font-size:12px;line-height:1.65;color:#8a748f}
-.hint b{color:#6d5473}
-.prog{margin-top:12px;font-size:12.5px;color:var(--accent);font-weight:700;display:none}
+.hint{margin-top:14px;background:var(--field);border:1px solid var(--line);border-radius:15px;
+  padding:12px 14px;font-size:12px;line-height:1.65;color:var(--ink-2)}
+.hint b{color:var(--ink)}
+.prog{margin-top:12px;font-size:12.5px;color:var(--accent-ink);font-weight:700;display:none}
 .prog.on{display:block}
 
-.legend{margin-top:14px;border-top:1px dashed var(--line2);padding-top:12px}
+.legend{margin-top:14px;border-top:1px dashed var(--line-2);padding-top:12px}
 .legend h3{margin:0 0 8px;font-size:13px}
-.legend .row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px;color:#7d6684}
+.legend .row{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:6px;color:var(--ink-2)}
 .legend .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 3px rgba(255,255,255,.7)}
 
 /* ---- 보드 ---- */
 .boardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .tabs{display:flex;gap:6px;background:rgba(255,255,255,.55);padding:4px;border-radius:15px;
-  border:1px solid rgba(255,255,255,.8);box-shadow:var(--shadow-sm)}
-.tabs button{border:none;background:transparent;padding:8px 16px;border-radius:12px;font-size:13.5px;font-weight:700;color:#a691b4;transition:.16s}
-.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 9px rgba(196,134,175,.22)}
+  border:1px solid var(--glass-line);box-shadow:var(--shadow-sm)}
+.tabs button{border:none;background:transparent;padding:8px 16px;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--sub);transition:.16s}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 9px var(--glow-soft)}
 .tools{display:flex;gap:8px}
-.tool{background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.85);border-radius:13px;
-  padding:8px 14px;font-size:12.5px;font-weight:600;color:#8a748f;box-shadow:var(--shadow-sm);transition:.16s}
-.tool:hover{color:var(--accent);box-shadow:0 5px 16px rgba(226,130,180,.28)}
+.tool{background:rgba(255,255,255,.7);border:1px solid var(--glass-line);border-radius:13px;
+  padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--ink-2);box-shadow:var(--shadow-sm);transition:.16s}
+.tool:hover{color:var(--accent-ink);box-shadow:0 5px 16px var(--glow)}
 
 .sections{display:grid;gap:14px}
 .sections.two{grid-template-columns:1fr 1fr}
 .sections.four{grid-template-columns:repeat(2,1fr)}
 @media(max-width:700px){.sections.two,.sections.four{grid-template-columns:1fr}}
-.sec{border-radius:var(--radius);border:1px solid rgba(255,255,255,.8);background:var(--glass);
+.sec{border-radius:var(--radius);border:1px solid var(--glass-line);background:var(--glass);
   box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
   overflow:hidden;transition:.16s}
-.sec.over{box-shadow:0 0 0 3px var(--accent),0 10px 30px rgba(226,130,180,.3)}
+.sec.over{box-shadow:0 0 0 3px var(--accent),0 10px 30px var(--glow)}
 .sec .sh{padding:11px 15px;display:flex;align-items:center;gap:9px;color:#fff;
-  text-shadow:0 1px 5px rgba(120,60,100,.22)}
+  text-shadow:0 1px 5px rgba(90,60,80,.22)}
 .sec .sh .emo{font-size:19px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.14))}
 .sec .sh .nm{font-weight:800;font-size:15px}
 .sec .sh .cnt{margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.34);padding:2px 10px;border-radius:20px}
 .sec .body{padding:13px 15px 17px;display:flex;flex-wrap:wrap;gap:12px;min-height:96px;align-content:flex-start}
-.sec .empty{color:#c9b3d2;font-size:12.5px;display:flex;align-items:center;justify-content:center;width:100%;min-height:72px}
+.sec .empty{color:var(--faint);font-size:12.5px;display:flex;align-items:center;justify-content:center;width:100%;min-height:72px}
 
 .chip{width:78px;text-align:center;cursor:grab;position:relative}
 .chip .av{width:70px;height:70px;border-radius:50%;display:block;margin:0 auto 6px;border:3px solid #fff;
-  box-shadow:0 3px 12px rgba(196,134,175,.34);background-color:#f7ebf3;background-repeat:no-repeat;transition:.16s}
-.chip:hover .av{transform:translateY(-2px);box-shadow:0 7px 18px rgba(226,130,180,.44)}
+  box-shadow:0 3px 12px var(--glow-mid);background-color:var(--avatar-bg);background-repeat:no-repeat;transition:.16s}
+.chip:hover .av{transform:translateY(-2px);box-shadow:0 7px 18px var(--glow)}
 .chip .cn{font-size:11.5px;font-weight:600;line-height:1.25;word-break:keep-all}
 .chip .badge{position:absolute;top:-2px;right:2px;font-size:12px;background:#fff;border-radius:20px;
-  padding:1px 5px;box-shadow:0 2px 7px rgba(196,134,175,.4);font-weight:800;line-height:1.4}
+  padding:1px 5px;box-shadow:0 2px 7px var(--glow-mid);font-weight:800;line-height:1.4}
 .chip.dragging{opacity:.35}
 
 /* ---- 모달 ---- */
-.mask{position:fixed;inset:0;background:rgba(92,58,96,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+.mask{position:fixed;inset:0;background:var(--mask-bg);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
 .mask.on{display:flex}
 .modal{background:rgba(255,255,255,.93);border:1px solid rgba(255,255,255,.9);border-radius:26px;width:100%;max-width:420px;
-  padding:22px;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(140,80,120,.32)}
+  padding:22px;max-height:88vh;overflow:auto;box-shadow:0 20px 60px var(--glow-mid)}
 .modal .top{display:flex;gap:14px;align-items:flex-start}
-.crop{width:126px;height:126px;border-radius:50%;flex:0 0 auto;background-color:#f7ebf3;background-repeat:no-repeat;
-  box-shadow:0 4px 16px rgba(196,134,175,.4);cursor:grab;touch-action:none;border:3px solid #fff}
+.crop{width:126px;height:126px;border-radius:50%;flex:0 0 auto;background-color:var(--avatar-bg);background-repeat:no-repeat;
+  box-shadow:0 4px 16px var(--glow-mid);cursor:grab;touch-action:none;border:3px solid #fff}
 .crop.drag{cursor:grabbing}
-.zoomhint{font-size:11px;color:#b7a3c2;margin-top:7px;text-align:center;line-height:1.45}
+.zoomhint{font-size:11px;color:var(--sub);margin-top:7px;text-align:center;line-height:1.45}
 .zoomrow{display:flex;gap:6px;justify-content:center;margin-top:7px}
-.zoomrow button{width:28px;height:26px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:15px;font-weight:800;color:#8a748f;line-height:1}
-.zoomrow button:hover{border-color:var(--accent);color:var(--accent)}
+.zoomrow button{width:28px;height:26px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:15px;font-weight:800;color:var(--ink-2);line-height:1}
+.zoomrow button:hover{border-color:var(--accent);color:var(--accent-ink)}
 .nameEdit{width:100%;font-size:18px;font-weight:800;color:var(--ink);border:1px solid transparent;border-radius:11px;
   padding:5px 8px;margin:-5px 0 5px -8px;background:transparent;font-family:inherit}
-.nameEdit:hover{border-color:var(--line);background:rgba(253,241,248,.7)}
-.nameEdit:focus{border-color:var(--accent);background:#fff;outline:none;box-shadow:0 0 0 4px rgba(234,138,185,.16)}
+.nameEdit:hover{border-color:var(--line);background:var(--field)}
+.nameEdit:focus{border-color:var(--accent);background:#fff;outline:none;box-shadow:0 0 0 4px var(--glow-soft)}
 .sub{font-size:12px;font-weight:800;color:var(--sub);margin:18px 0 8px}
 .bar{margin-bottom:9px}
 .bar .l{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px}
-.bar .t{height:8px;border-radius:6px;background:#f6ecf4;overflow:hidden}
+.bar .t{height:8px;border-radius:6px;background:var(--field);overflow:hidden}
 .bar .f{height:100%;border-radius:6px}
-.meter{height:12px;border-radius:8px;background:linear-gradient(90deg,#9b8fc7,#efe4f2,#f4a8c8);position:relative;margin:6px 0 4px}
-.meter i{position:absolute;top:-3px;width:6px;height:18px;border-radius:3px;background:#5c4462;
-  box-shadow:0 1px 5px rgba(92,68,98,.45);transform:translateX(-50%)}
+.meter{height:12px;border-radius:8px;background:var(--meter-bg);position:relative;margin:6px 0 4px}
+.meter i{position:absolute;top:-3px;width:6px;height:18px;border-radius:3px;background:var(--needle);
+  box-shadow:0 1px 5px rgba(60,50,70,.4);transform:translateX(-50%)}
 .meterlab{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--sub)}
-.desc{background:rgba(253,241,248,.8);border:1px solid var(--line);border-radius:15px;padding:12px 14px;font-size:12.5px;line-height:1.65;color:#7d6684}
-.feat{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:11.5px;color:#8a748f;
-  background:rgba(253,241,248,.6);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.desc{background:var(--field);border:1px solid var(--line);border-radius:15px;padding:12px 14px;font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:11.5px;color:var(--ink-2);
+  background:var(--field);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .feat div{display:flex;justify-content:space-between}
-.feat b{color:#6d5473;font-weight:700}
+.feat b{color:var(--ink);font-weight:700}
 .pick{display:flex;flex-wrap:wrap;gap:6px}
-.pick button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:#8a748f;transition:.14s}
+.pick button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-2);transition:.14s}
 .pick button:hover{border-color:var(--accent)}
-.pick button.on{color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(196,134,175,.35)}
+.pick button.on{color:#fff;border-color:transparent;box-shadow:0 3px 10px var(--glow-mid)}
 .mact{display:flex;gap:8px;margin-top:18px}
-.mact button{flex:1;padding:11px;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:700;color:#8a748f}
-.mact .del{color:#e2718f;border-color:#f6d7e0}
-.mact .close{background:linear-gradient(110deg,#f29ec6,#b8a6ec);color:#fff;border-color:transparent;
-  box-shadow:0 4px 14px rgba(226,130,180,.34)}
+.mact button{flex:1;padding:11px;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:700;color:var(--ink-2)}
+.mact .del{color:var(--danger);border-color:var(--danger-line)}
+.mact .close{background:var(--btn-bg);color:#fff;border-color:transparent;box-shadow:0 4px 14px var(--glow)}
 
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
-  background:rgba(92,68,98,.94);color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;font-weight:600;
-  box-shadow:0 8px 26px rgba(120,70,110,.4);opacity:0;pointer-events:none;transition:.25s;z-index:60}
+  background:var(--toast-bg);color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;font-weight:600;
+  box-shadow:0 8px 26px var(--glow-mid);opacity:0;pointer-events:none;transition:.25s;z-index:60}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
+<script>
+/* 첫 페인트 전에 색상 모드를 적용해 깜빡임을 막는다 */
+try{ var _t=localStorage.getItem('physiognomy-theme');
+     if(_t==='blooming') document.documentElement.setAttribute('data-theme',_t); }catch(e){}
+</script>
 </head>
 <body>
 <div class="haze" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -178,6 +236,10 @@ header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1p
     <h1>관상 분류기 <span>@whitecotchi</span></h1>
   </div>
   <p>사진을 넣으면 얼굴을 분석해서 <b>동물상</b>과 <b>^^ / ㅍㅍ상</b>으로 자동 분류해요</p>
+  <div class="seg" role="group" aria-label="색상 모드" id="themeSeg">
+    <button data-set="baekco" aria-pressed="true">백코</button>
+    <button data-set="blooming" aria-pressed="false">블루밍</button>
+  </div>
 </header>
 
 <div class="wrap">
@@ -260,6 +322,12 @@ const EXPRS = [
   {k:'smile', n:'^^상',   e:'^^',   c:'#f09bc0', label:'웃는상', desc:'입꼬리가 올라가 있고 눈이 부드럽게 접히는 쪽. 가만히 있어도 웃는 것처럼 보여 말 걸기 편한 얼굴.'}
 ];
 const EMAP = Object.fromEntries(EXPRS.map(e=>[e.k,e]));
+/* ㅍㅍ / ^^ 는 보드의 큰 두 칸이라 색상 모드를 따라간다 (동물상 색은 종 구분용이라 고정) */
+const EXPR_COLORS = {
+  baekco:  {sharp:'#8e83bb', smile:'#f09bc0'},
+  blooming:{sharp:'#6f9fc4', smile:'#4fc3ae'}
+};
+const exprColor = k => (EXPR_COLORS[theme] || EXPR_COLORS.baekco)[k] || EMAP[k].c;
 
 /* ===================== 이미지 분석 ===================== */
 function clamp(v,a,b){ a=a===undefined?-1:a; b=b===undefined?1:b; return Math.max(a,Math.min(b,v)); }
@@ -552,6 +620,32 @@ async function analyzeFace(src){
 
 /* ===================== 상태 ===================== */
 const KEY = 'gwansang-wc-v2';
+const THEME_KEY = 'physiognomy-theme';
+let theme = 'baekco';
+
+/* PNG 내보내기용 색상 (화면 테마와 맞춤) */
+const EXPORT_THEME = {
+  baekco:  {bg:'#fbf1f7', g0:'#f7b8d4', g1:'#e3aee8', g2:'#bfc6f6',
+            ink:'#5c4462', sub:'#b39ec0', dim:'#a691b4', dash:'#f0a8cc',
+            shadow:'rgba(196,134,175,.38)', ph:'#f7ebf3'},
+  blooming:{bg:'#eff9fc', g0:'#8ed3ee', g1:'#79cfd9', g2:'#a7e5cd',
+            ink:'#17414d', sub:'#8fb8c4', dim:'#7fa7b3', dash:'#7fd0e0',
+            shadow:'rgba(60,150,180,.34)', ph:'#e4f2f7'}
+};
+function setTheme(t){
+  theme = (t === 'blooming') ? 'blooming' : 'baekco';
+  if(theme === 'blooming') document.documentElement.setAttribute('data-theme','blooming');
+  else document.documentElement.removeAttribute('data-theme');
+  for(const b of $('#themeSeg').children) b.setAttribute('aria-pressed', String(b.dataset.set === theme));
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', theme === 'blooming' ? '#8ed3ee' : '#f7c4de');
+  try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+  if(document.querySelector('#sections')){
+    renderLegend(); renderBoard();
+    const c = cur();
+    if(c && $('#mask').classList.contains('on')) refreshModalResult(c);
+  }
+}
 const SRC_MAX = 420;      /* 원본 보관 최대 변 */
 const CROP_BOX = 126;     /* 모달 크롭 프레임 px */
 let chars = [];
@@ -675,7 +769,7 @@ async function addFiles(files){
 /* ===================== 보드 ===================== */
 function groupsFor(v){
   return v==='expr'
-    ? EXPRS.map(t=>({key:t.k, name:t.n, emo:'', color:t.c, list:chars.filter(c=>c.expr===t.k)}))
+    ? EXPRS.map(t=>({key:t.k, name:t.n, emo:'', color:exprColor(t.k), list:chars.filter(c=>c.expr===t.k)}))
     : ANIMALS.map(t=>({key:t.k, name:t.n, emo:t.e, color:t.c, list:chars.filter(c=>c.animal===t.k)}));
 }
 function renderBoard(){
@@ -725,7 +819,7 @@ function renderBoard(){
 }
 function renderLegend(){
   $('#legend').innerHTML='<h3>분류</h3>'+
-    EXPRS.map(t=>'<div class="row"><span class="dot" style="background:'+t.c+'"></span><b>'+t.n+'</b></div>').join('')+
+    EXPRS.map(t=>'<div class="row"><span class="dot" style="background:'+exprColor(t.k)+'"></span><b>'+t.n+'</b></div>').join('')+
     '<div style="height:6px"></div>'+
     ANIMALS.map(t=>'<div class="row"><span class="dot" style="background:'+t.c+'"></span><b style="width:22px">'+t.e+'</b>'+t.n+'</div>').join('');
 }
@@ -734,7 +828,7 @@ function renderLegend(){
 let reTimer=null, delArmed=false;
 function typeLineHTML(c){
   const A=AMAP[c.animal], E=EMAP[c.expr];
-  return '<div class="ty" id="mTypeLine" style="color:'+E.c+'">'+E.n+
+  return '<div class="ty" id="mTypeLine" style="color:'+exprColor(c.expr)+'">'+E.n+
     ' <span style="color:#e0cfe4">|</span> <span style="color:'+A.c+'">'+A.e+' '+A.n+'</span></div>'+
     '<div id="mStat" style="font-size:11.5px;color:#8698a8;margin-top:3px">'+
     ((c.manualA||c.manualE)?'직접 지정됨':(c.detected===false?'얼굴 인식 약함':'자동 판정'))+'</div>';
@@ -777,7 +871,7 @@ function refreshModalResult(c){
   const A=AMAP[c.animal], E=EMAP[c.expr];
   const tl=$('#mTypeLine');
   if(tl){
-    tl.style.color=E.c;
+    tl.style.color=exprColor(c.expr);
     tl.innerHTML=E.n+' <span style="color:#e0cfe4">|</span> <span style="color:'+A.c+'">'+A.e+' '+A.n+'</span>';
   }
   const st=$('#mStat');
@@ -807,7 +901,7 @@ function refreshModalResult(c){
 
   $('#mPick').innerHTML=
     EXPRS.map(t=>'<button data-dim="e" data-k="'+t.k+'" class="'+(c.expr===t.k?'on':'')+'"'+
-      (c.expr===t.k?' style="background:'+t.c+'"':'')+'>'+t.e+'</button>').join('')+
+      (c.expr===t.k?' style="background:'+exprColor(t.k)+'"':'')+'>'+t.e+'</button>').join('')+
     '<span style="width:100%;height:0"></span>'+
     ANIMALS.map(t=>'<button data-dim="a" data-k="'+t.k+'" class="'+(c.animal===t.k?'on':'')+'"'+
       (c.animal===t.k?' style="background:'+t.c+'"':'')+'>'+t.e+' '+t.n+'</button>').join('');
@@ -900,9 +994,10 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
 }
 function drawChip(ctx,c,im,cx,cy,AV,CELL){
+  const T=EXPORT_THEME[theme]||EXPORT_THEME.baekco;
   ctx.save();
   ctx.beginPath(); ctx.arc(cx,cy,AV/2,0,Math.PI*2);
-  ctx.shadowColor='rgba(196,134,175,.38)'; ctx.shadowBlur=11; ctx.shadowOffsetY=3;
+  ctx.shadowColor=T.shadow; ctx.shadowBlur=11; ctx.shadowOffsetY=3;
   ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
   ctx.save();
   ctx.beginPath(); ctx.arc(cx,cy,AV/2-3,0,Math.PI*2); ctx.clip();
@@ -910,10 +1005,10 @@ function drawChip(ctx,c,im,cx,cy,AV,CELL){
     const r=cropRect(c);
     ctx.drawImage(im, r.sx, r.sy, r.side, r.side, cx-AV/2+3, cy-AV/2+3, AV-6, AV-6);
   } else {
-    ctx.fillStyle='#f7ebf3'; ctx.fillRect(cx-AV/2,cy-AV/2,AV,AV);
+    ctx.fillStyle=T.ph; ctx.fillRect(cx-AV/2,cy-AV/2,AV,AV);
   }
   ctx.restore();
-  ctx.fillStyle='#5c4462'; ctx.font='600 14px "Malgun Gothic",sans-serif';
+  ctx.fillStyle=T.ink; ctx.font='600 14px "Malgun Gothic",sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   let nm=c.name;
   while(ctx.measureText(nm).width>CELL-10 && nm.length>1) nm=nm.slice(0,-1);
@@ -941,17 +1036,18 @@ async function exportPNG(){
 
   const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
-  ctx.fillStyle='#fbf1f7'; ctx.fillRect(0,0,W,H);
+  const T=EXPORT_THEME[theme]||EXPORT_THEME.baekco;
+  ctx.fillStyle=T.bg; ctx.fillRect(0,0,W,H);
   const grad=ctx.createLinearGradient(0,0,W,0);
-  grad.addColorStop(0,'#f7b8d4'); grad.addColorStop(0.5,'#e3aee8'); grad.addColorStop(1,'#bfc6f6');
+  grad.addColorStop(0,T.g0); grad.addColorStop(0.5,T.g1); grad.addColorStop(1,T.g2);
   ctx.fillStyle=grad; ctx.fillRect(0,0,W,8);
   ctx.textBaseline='middle';
-  ctx.fillStyle='#5c4462'; ctx.font='700 29px "Malgun Gothic",sans-serif'; ctx.textAlign='left';
+  ctx.fillStyle=T.ink; ctx.font='700 29px "Malgun Gothic",sans-serif'; ctx.textAlign='left';
   ctx.fillText('관상 분류기', PAD, PAD+16);
   const tw=ctx.measureText('관상 분류기').width;
-  ctx.fillStyle='#b39ec0'; ctx.font='500 20px "Malgun Gothic",sans-serif';
+  ctx.fillStyle=T.sub; ctx.font='500 20px "Malgun Gothic",sans-serif';
   ctx.fillText('@whitecotchi', PAD+tw+10, PAD+18);
-  ctx.fillStyle='#a691b4'; ctx.font='15px "Malgun Gothic",sans-serif'; ctx.textAlign='right';
+  ctx.fillStyle=T.dim; ctx.font='15px "Malgun Gothic",sans-serif'; ctx.textAlign='right';
   ctx.fillText('총 '+chars.length+'명', W-PAD, PAD+18);
 
   const imgs={};
@@ -961,7 +1057,7 @@ async function exportPNG(){
     const y0=PAD+62;
     let mx=0; groups.forEach(g=>mx=Math.max(mx,Math.ceil(g.list.length/PER)));
     ctx.save();
-    ctx.setLineDash([3,9]); ctx.lineWidth=5; ctx.lineCap='round'; ctx.strokeStyle='#f0a8cc';
+    ctx.setLineDash([3,9]); ctx.lineWidth=5; ctx.lineCap='round'; ctx.strokeStyle=T.dash;
     ctx.beginPath(); ctx.moveTo(W/2,y0); ctx.lineTo(W/2,y0+48+mx*ROW); ctx.stroke();
     ctx.restore();
     groups.forEach((g,gi)=>{
@@ -1025,6 +1121,9 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); view=b.dataset.view; renderBoard();
 }));
+$('#themeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b) setTheme(b.dataset.set);
+});
 $('#exportBtn').addEventListener('click',exportPNG);
 $('#reanalyzeBtn').addEventListener('click',async()=>{
   if(!chars.length) return;
@@ -1078,6 +1177,7 @@ document.addEventListener('keydown',e=>{
 
 /* ===================== 시작 ===================== */
 load();
+try{ setTheme(localStorage.getItem(THEME_KEY) || 'baekco'); }catch(e){ setTheme('baekco'); }
 renderLegend();
 renderBoard();
 

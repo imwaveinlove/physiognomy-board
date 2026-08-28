@@ -62,6 +62,30 @@
   --logo-shadow:rgba(20,85,110,.32);
   --danger:#dd6b83; --danger-line:#f3d6dc;
 }
+/* 파도 — 연노랑 모래에서 푸른 바다로 */
+:root[data-theme="pado"]{
+  --ink:#1d3f5c; --ink-2:#3f6a8a; --sub:#7d9db8; --faint:#b0c8dc;
+  --line:#dbe9f4; --line-2:#e7f1f8;
+  --accent:#4f9fd4; --accent-2:#e6cb63; --accent-ink:#2f7fb4;
+  --glass:rgba(255,255,255,.67); --glass-line:rgba(255,255,255,.82);
+  --field:rgba(248,251,244,.8);
+  --avatar-bg:#e6eff7;
+  --body-bg:linear-gradient(165deg,#fefae2 0%,#eef6ee 42%,#d8e8fb 100%);
+  --header-bg:linear-gradient(112deg,#f7e6a0 0%,#a6d8c8 46%,#7fb3e8 100%);
+  --haze-1:#f9edaa; --haze-2:#a9dccb; --haze-3:#93c0ef; --haze-4:#cfe6f7;
+  --btn-bg:linear-gradient(110deg,#e9cd63,#5aa6dd);
+  --meter-bg:linear-gradient(90deg,#4a7fa8,#eef4f2,#efd671);
+  --needle:#1d3f5c;
+  --mask-bg:rgba(24,58,84,.42);
+  --toast-bg:rgba(24,58,84,.94);
+  --glow:rgba(90,150,200,.34);
+  --glow-soft:rgba(80,130,180,.16);
+  --glow-mid:rgba(80,130,180,.32);
+  --header-glow:rgba(120,170,215,.30);
+  --title-shadow:rgba(30,80,120,.26);
+  --logo-shadow:rgba(30,70,110,.32);
+  --danger:#dd6b7f; --danger-line:#f2d6db;
+}
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -225,7 +249,7 @@ header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1p
 <script>
 /* 첫 페인트 전에 색상 모드를 적용해 깜빡임을 막는다 */
 try{ var _t=localStorage.getItem('physiognomy-theme');
-     if(_t==='blooming') document.documentElement.setAttribute('data-theme',_t); }catch(e){}
+     if(_t==='blooming'||_t==='pado') document.documentElement.setAttribute('data-theme',_t); }catch(e){}
 </script>
 </head>
 <body>
@@ -239,6 +263,7 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
   <div class="seg" role="group" aria-label="색상 모드" id="themeSeg">
     <button data-set="baekco" aria-pressed="true">백코</button>
     <button data-set="blooming" aria-pressed="false">블루밍</button>
+    <button data-set="pado" aria-pressed="false">파도</button>
   </div>
 </header>
 
@@ -325,7 +350,8 @@ const EMAP = Object.fromEntries(EXPRS.map(e=>[e.k,e]));
 /* ㅍㅍ / ^^ 는 보드의 큰 두 칸이라 색상 모드를 따라간다 (동물상 색은 종 구분용이라 고정) */
 const EXPR_COLORS = {
   baekco:  {sharp:'#8e83bb', smile:'#f09bc0'},
-  blooming:{sharp:'#6f9fc4', smile:'#4fc3ae'}
+  blooming:{sharp:'#6f9fc4', smile:'#4fc3ae'},
+  pado:    {sharp:'#5a8fbe', smile:'#e0bd4c'}
 };
 const exprColor = k => (EXPR_COLORS[theme] || EXPR_COLORS.baekco)[k] || EMAP[k].c;
 
@@ -630,15 +656,18 @@ const EXPORT_THEME = {
             shadow:'rgba(196,134,175,.38)', ph:'#f7ebf3'},
   blooming:{bg:'#eff9fc', g0:'#8ed3ee', g1:'#79cfd9', g2:'#a7e5cd',
             ink:'#17414d', sub:'#8fb8c4', dim:'#7fa7b3', dash:'#7fd0e0',
-            shadow:'rgba(60,150,180,.34)', ph:'#e4f2f7'}
+            shadow:'rgba(60,150,180,.34)', ph:'#e4f2f7'},
+  pado:    {bg:'#fbf8ea', g0:'#f7e6a0', g1:'#a6d8c8', g2:'#7fb3e8',
+            ink:'#1d3f5c', sub:'#93b3c8', dim:'#7d9db8', dash:'#8fc6de',
+            shadow:'rgba(80,130,180,.34)', ph:'#e6eff7'}
 };
 function setTheme(t){
-  theme = (t === 'blooming') ? 'blooming' : 'baekco';
-  if(theme === 'blooming') document.documentElement.setAttribute('data-theme','blooming');
-  else document.documentElement.removeAttribute('data-theme');
+  theme = (t === 'blooming' || t === 'pado') ? t : 'baekco';
+  if(theme === 'baekco') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', theme);
   for(const b of $('#themeSeg').children) b.setAttribute('aria-pressed', String(b.dataset.set === theme));
   const m = document.querySelector('meta[name="theme-color"]');
-  if(m) m.setAttribute('content', theme === 'blooming' ? '#8ed3ee' : '#f7c4de');
+  if(m) m.setAttribute('content', {baekco:'#f7c4de', blooming:'#8ed3ee', pado:'#f7e6a0'}[theme]);
   try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
   if(document.querySelector('#sections')){
     renderLegend(); renderBoard();

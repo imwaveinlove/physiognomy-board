@@ -62,8 +62,8 @@
   --logo-shadow:rgba(20,85,110,.32);
   --danger:#dd6b83; --danger-line:#f3d6dc;
 }
-/* 파도 — 연노랑 모래에서 푸른 바다로 */
-:root[data-theme="pado"]{
+/* 블루레몬 — 연노랑 레몬에서 푸른 바다로 */
+:root[data-theme="bluelemon"]{
   --ink:#1d3f5c; --ink-2:#3f6a8a; --sub:#7d9db8; --faint:#b0c8dc;
   --line:#dbe9f4; --line-2:#e7f1f8;
   --accent:#4f9fd4; --accent-2:#e6cb63; --accent-ink:#2f7fb4;
@@ -249,7 +249,8 @@ header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1p
 <script>
 /* 첫 페인트 전에 색상 모드를 적용해 깜빡임을 막는다 */
 try{ var _t=localStorage.getItem('physiognomy-theme');
-     if(_t==='blooming'||_t==='pado') document.documentElement.setAttribute('data-theme',_t); }catch(e){}
+     if(_t==='pado'){ _t='bluelemon'; localStorage.setItem('physiognomy-theme',_t); }   /* 예전 이름 */
+     if(_t==='blooming'||_t==='bluelemon') document.documentElement.setAttribute('data-theme',_t); }catch(e){}
 </script>
 </head>
 <body>
@@ -263,7 +264,7 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
   <div class="seg" role="group" aria-label="색상 모드" id="themeSeg">
     <button data-set="baekco" aria-pressed="true">백코</button>
     <button data-set="blooming" aria-pressed="false">블루밍</button>
-    <button data-set="pado" aria-pressed="false">파도</button>
+    <button data-set="bluelemon" aria-pressed="false">블루레몬</button>
   </div>
 </header>
 
@@ -351,7 +352,7 @@ const EMAP = Object.fromEntries(EXPRS.map(e=>[e.k,e]));
 const EXPR_COLORS = {
   baekco:  {sharp:'#8e83bb', smile:'#f09bc0'},
   blooming:{sharp:'#6f9fc4', smile:'#4fc3ae'},
-  pado:    {sharp:'#5a8fbe', smile:'#e0bd4c'}
+  bluelemon:{sharp:'#5a8fbe', smile:'#e0bd4c'}
 };
 const exprColor = k => (EXPR_COLORS[theme] || EXPR_COLORS.baekco)[k] || EMAP[k].c;
 
@@ -657,17 +658,18 @@ const EXPORT_THEME = {
   blooming:{bg:'#eff9fc', g0:'#8ed3ee', g1:'#79cfd9', g2:'#a7e5cd',
             ink:'#17414d', sub:'#8fb8c4', dim:'#7fa7b3', dash:'#7fd0e0',
             shadow:'rgba(60,150,180,.34)', ph:'#e4f2f7'},
-  pado:    {bg:'#fbf8ea', g0:'#f7e6a0', g1:'#a6d8c8', g2:'#7fb3e8',
+  bluelemon:{bg:'#fbf8ea', g0:'#f7e6a0', g1:'#a6d8c8', g2:'#7fb3e8',
             ink:'#1d3f5c', sub:'#93b3c8', dim:'#7d9db8', dash:'#8fc6de',
             shadow:'rgba(80,130,180,.34)', ph:'#e6eff7'}
 };
 function setTheme(t){
-  theme = (t === 'blooming' || t === 'pado') ? t : 'baekco';
+  if(t === 'pado') t = 'bluelemon';                       /* 예전 이름 호환 */
+  theme = (t === 'blooming' || t === 'bluelemon') ? t : 'baekco';
   if(theme === 'baekco') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', theme);
   for(const b of $('#themeSeg').children) b.setAttribute('aria-pressed', String(b.dataset.set === theme));
   const m = document.querySelector('meta[name="theme-color"]');
-  if(m) m.setAttribute('content', {baekco:'#f7c4de', blooming:'#8ed3ee', pado:'#f7e6a0'}[theme]);
+  if(m) m.setAttribute('content', {baekco:'#f7c4de', blooming:'#8ed3ee', bluelemon:'#f7e6a0'}[theme]);
   try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
   if(document.querySelector('#sections')){
     renderLegend(); renderBoard();

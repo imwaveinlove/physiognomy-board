@@ -89,9 +89,29 @@
 | `icon/icon-180.png` | iOS 홈화면 아이콘 |
 | `icon/icon-192.png` | 헤더 로고 |
 
+## 광고 (Google AdSense)
+
+| 넣은 것 | 위치 |
+|---|---|
+| 소유 확인 메타 태그 | `index.html` `<head>` |
+| `adsbygoogle.js` 스크립트 | `index.html` `<head>` |
+| `ads.txt` | 저장소 루트 |
+
+스크립트만 있으면 **자동 광고(Auto ads)**가 동작한다 — 켜고 끄는 건 애드센스 대시보드에서 한다.
+왼쪽 패널 아래에 수동 광고 자리(`#adBox`)를 미리 잡아뒀고, 애드센스에서 광고 단위를 만들어 받은
+슬롯 ID를 `index.html` 의 `const AD_SLOT = ''` 에 넣으면 그 자리에 배너가 붙는다.
+비어 있으면 자리 자체가 렌더되지 않으므로 빈 칸이 남지 않는다.
+
+### ads.txt 위치 주의
+
+크롤러는 **도메인 루트**의 `/ads.txt` 만 읽는다.
+GitHub Pages 프로젝트 페이지(`imwaveinlove.github.io/physiognomy-board/`)로 올리면 이 파일은
+`.../physiognomy-board/ads.txt` 에 놓여 인식되지 않는다.
+`imwaveinlove.github.io` 저장소 루트에 같은 줄을 넣거나, 커스텀 도메인을 쓰고 그 루트에 두어야 한다.
+
 ## 구현 메모
 
-- 외부 라이브러리 없는 단일 HTML 파일 (아이콘 이미지만 `icon/`에서 참조)
+- 외부 라이브러리 없는 단일 HTML 파일 (아이콘 이미지는 `icon/`, 애드센스 스크립트만 외부 요청)
 - 색상 모드는 `:root` CSS 변수 + `data-theme="blooming"` 오버라이드 구조 (백코가 바닥값이라 스크립트 전에도 그려짐)
 - 업로드 이미지는 최대 변 420px JPEG **원본 1장**으로 저장하고, 크롭은 `{cx, cy, s}` 값으로만 들고 있음
   (칩·모달은 `background-size`/`background-position`으로, 분석과 PNG 내보내기는 `drawImage`의 소스 사각형으로 같은 값을 씀)

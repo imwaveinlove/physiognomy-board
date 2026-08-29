@@ -8,6 +8,9 @@
 <link rel="icon" type="image/png" sizes="16x16" href="icon/icon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icon/icon-180.png">
 <meta name="theme-color" content="#f7c4de">
+<meta name="google-adsense-account" content="ca-pub-1647306421696648">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1647306421696648"
+     crossorigin="anonymous"></script>
 <style>
 /* ─── 색상 모드 ────────────────────────────────────────────
    백코(연분홍)가 기본값이라 스크립트가 돌기 전에도 그대로 그려진다.
@@ -241,6 +244,14 @@ header p{margin:9px 0 0;font-size:13.5px;color:#fff;opacity:.95;text-shadow:0 1p
 .mact .del{color:var(--danger);border-color:var(--danger-line)}
 .mact .close{background:var(--btn-bg);color:#fff;border-color:transparent;box-shadow:0 4px 14px var(--glow)}
 
+/* ---- 광고 ---- */
+.adbox{margin-top:16px;padding:10px;border:1px solid var(--line);border-radius:16px;
+  background:rgba(255,255,255,.5);text-align:center;min-height:0}
+.adbox[hidden]{display:none}
+.adbox .adlabel{display:block;font-size:10.5px;font-weight:700;color:var(--sub);
+  margin-bottom:6px;letter-spacing:.06em}
+.adbox ins{display:block}
+
 /* ---- 궁합 ---- */
 .sections.pair{grid-template-columns:1fr}
 .pairlist{padding:13px 15px 17px;display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
@@ -303,6 +314,7 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
 </header>
 
 <div class="wrap">
+  <div class="side">
   <div class="card panel">
     <h2>사진 넣기</h2>
     <div class="drop" id="drop">
@@ -321,6 +333,8 @@ try{ var _t=localStorage.getItem('physiognomy-theme');
     </div>
 
     <div class="legend" id="legend"></div>
+  </div>
+  <div class="adbox" id="adBox" hidden><span class="adlabel">광고</span></div>
   </div>
 
   <div>
@@ -1062,6 +1076,26 @@ function armDelete(btn,label){
   clearTimeout(delTimer); delTimer=setTimeout(disarmDelete,3000);
 }
 
+/* ===================== 광고 ===================== */
+const ADSENSE_CLIENT = 'ca-pub-1647306421696648';
+/* 애드센스에서 '광고 단위'를 만들면 나오는 슬롯 ID를 여기 넣으면 이 자리에 배너가 붙는다.
+   비워두면 자동 광고(Auto ads)만 동작한다 — 자동 광고는 애드센스 대시보드에서 켠다. */
+const AD_SLOT = '';
+function mountAd(){
+  if(!AD_SLOT) return;
+  const box=$('#adBox'); if(!box) return;
+  const ins=document.createElement('ins');
+  ins.className='adsbygoogle';
+  ins.style.display='block';
+  ins.setAttribute('data-ad-client', ADSENSE_CLIENT);
+  ins.setAttribute('data-ad-slot', AD_SLOT);
+  ins.setAttribute('data-ad-format','auto');
+  ins.setAttribute('data-full-width-responsive','true');
+  box.appendChild(ins);
+  box.hidden=false;
+  try{ (window.adsbygoogle = window.adsbygoogle || []).push({}); }catch(e){}
+}
+
 /* ===================== 얼굴궁합 ===================== */
 /* 동물상 상성표 — 결이 다른 조합(순한 쪽 × 날선 쪽)이 높고,
    같은 결끼리는 무난, 완전히 같은 상은 닮은꼴이라 낮다. 대칭이다. */
@@ -1481,6 +1515,7 @@ load();
 try{ setTheme(localStorage.getItem(THEME_KEY) || 'baekco'); }catch(e){ setTheme('baekco'); }
 renderLegend();
 renderBoard();
+mountAd();
 
 /* 분류 종류가 늘어난 뒤 저장분은 점수를 다시 매긴다 (직접 지정한 건 유지) */
 (async()=>{

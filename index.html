@@ -395,7 +395,9 @@ const ANIMALS = [
   {k:'rabbit',n:'토끼상',  e:'🐰', c:'#ee8fbb', desc:'눈이 아주 크고 동그란 데다 얼굴이 짧고 이목구비가 중앙에 오밀조밀. 여리고 보호본능을 자극하는 얼굴.'},
   {k:'deer', n:'사슴상',   e:'🦌', c:'#6dbdb5', desc:'눈이 크고 맑으면서 얼굴은 갸름하고 긴 계란형. 서늘하면서도 선해 보이는, 그림 같은 얼굴.'},
   {k:'wolf', n:'늑대상',   e:'🐺', c:'#8395cd', desc:'눈이 가늘고 날카로운 데다 얼굴선이 길고 턱이 각진 편. 눈빛이 서늘해서 다가가기 전에 한 번 재게 되는 얼굴.'},
-  {k:'dino', n:'공룡상',   e:'🦖', c:'#8cc389', desc:'이목구비가 시원시원하고 입이 큼직한 편. 얼굴선이 각지고 길어서 한 번 보면 잊히지 않는, 개성 강한 얼굴.'}
+  {k:'dino', n:'공룡상',   e:'🦖', c:'#8cc389', desc:'이목구비가 시원시원하고 입이 큼직한 편. 얼굴선이 각지고 길어서 한 번 보면 잊히지 않는, 개성 강한 얼굴.'},
+  {k:'tiger',n:'호랑이상', e:'🐯', c:'#dd9a2b', desc:'눈이 크고 부리부리한 데다 눈꼬리가 올라가고, 얼굴 폭이 넓고 턱선이 각진 편. 이목구비가 진해서 존재감이 크고 쉽게 눌리지 않는 얼굴.'},
+  {k:'hamster',n:'햄스터상',e:'🐹',c:'#e9c48f', desc:'얼굴이 짧고 둥글넓적한데 눈은 작고 동그랗고 입도 작은 편. 볼살이 도톰해 보여서 만만하고 귀엽게 읽히는 얼굴.'}
 ];
 const AMAP = Object.fromEntries(ANIMALS.map(a=>[a.k,a]));
 
@@ -662,7 +664,9 @@ async function analyzeFace(src){
     rabbit:0.85*Rr + 0.05*Uu + 0.30*Vl + 1.05*Aa - 1.00*Ll,
     deer:  0.35*Rr + 0.00*Uu + 0.85*Vl + 0.85*Aa + 0.90*Ll,
     wolf: -0.85*Rr + 0.45*Uu - 0.55*Vl - 0.70*Aa + 0.85*Ll,
-    dino: -0.15*Rr + 0.00*Uu - 0.45*Vl + 0.35*Aa + 0.30*Ll + 1.60*Mw
+    dino: -0.15*Rr + 0.00*Uu - 0.45*Vl + 0.35*Aa + 0.30*Ll + 1.60*Mw,
+    tiger:  0.30*Rr + 0.85*Uu - 0.95*Vl + 0.90*Aa - 0.20*Ll - 0.35*Mw,
+    hamster:1.10*Rr - 0.30*Uu - 0.55*Vl - 0.45*Aa - 0.85*Ll - 0.60*Mw
   };
   const T=1.15;
   const exps = ANIMALS.map(a=>Math.exp(raw[a.k]/T));
@@ -1104,14 +1108,16 @@ function mountAd(){
 /* 동물상 상성표 — 결이 다른 조합(순한 쪽 × 날선 쪽)이 높고,
    같은 결끼리는 무난, 완전히 같은 상은 닮은꼴이라 낮다. 대칭이다. */
 const AFFINITY = {
-  dog:   {dog:74, cat:95, fox:82, bear:78, rabbit:88, deer:80, wolf:90, dino:84},
-  cat:   {dog:95, cat:68, fox:70, bear:92, rabbit:85, deer:76, wolf:72, dino:86},
-  fox:   {dog:82, cat:70, fox:66, bear:90, rabbit:87, deer:74, wolf:80, dino:78},
-  bear:  {dog:78, cat:92, fox:90, bear:72, rabbit:91, deer:86, wolf:82, dino:88},
-  rabbit:{dog:88, cat:85, fox:87, bear:91, rabbit:70, deer:82, wolf:89, dino:80},
-  deer:  {dog:80, cat:76, fox:74, bear:86, rabbit:82, deer:71, wolf:88, dino:75},
-  wolf:  {dog:90, cat:72, fox:80, bear:82, rabbit:89, deer:88, wolf:65, dino:79},
-  dino:  {dog:84, cat:86, fox:78, bear:88, rabbit:80, deer:75, wolf:79, dino:73}
+  dog:    {dog:74, cat:95, fox:82, bear:78, rabbit:88, deer:80, wolf:90, dino:84, tiger:90, hamster:80},
+  cat:    {dog:95, cat:68, fox:70, bear:92, rabbit:85, deer:76, wolf:72, dino:86, tiger:74, hamster:90},
+  fox:    {dog:82, cat:70, fox:66, bear:90, rabbit:87, deer:74, wolf:80, dino:78, tiger:76, hamster:88},
+  bear:   {dog:78, cat:92, fox:90, bear:72, rabbit:91, deer:86, wolf:82, dino:88, tiger:80, hamster:78},
+  rabbit: {dog:88, cat:85, fox:87, bear:91, rabbit:70, deer:82, wolf:89, dino:80, tiger:92, hamster:76},
+  deer:   {dog:80, cat:76, fox:74, bear:86, rabbit:82, deer:71, wolf:88, dino:75, tiger:89, hamster:81},
+  wolf:   {dog:90, cat:72, fox:80, bear:82, rabbit:89, deer:88, wolf:65, dino:79, tiger:68, hamster:91},
+  dino:   {dog:84, cat:86, fox:78, bear:88, rabbit:80, deer:75, wolf:79, dino:73, tiger:82, hamster:85},
+  tiger:  {dog:90, cat:74, fox:76, bear:80, rabbit:92, deer:89, wolf:68, dino:82, tiger:64, hamster:93},
+  hamster:{dog:80, cat:90, fox:88, bear:78, rabbit:76, deer:81, wolf:91, dino:85, tiger:93, hamster:69}
 };
 /* 점수는 구조상 58~98 구간에 모인다. 등급은 그 실제 분포에 맞춰 끊었다 */
 const PAIR_GRADES = [

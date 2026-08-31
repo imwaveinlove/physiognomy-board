@@ -993,7 +993,11 @@ function refreshModalResult(c){
       (c.expr===t.k?' style="background:'+exprColor(t.k)+'"':'')+'>'+t.e+'</button>').join('')+
     '<span style="width:100%;height:0"></span>'+
     ANIMALS.map(t=>'<button data-dim="a" data-k="'+t.k+'" class="'+(c.animal===t.k?'on':'')+'"'+
-      (c.animal===t.k?' style="background:'+t.c+'"':'')+'>'+t.e+' '+t.n+'</button>').join('');
+      (c.animal===t.k?' style="background:'+t.c+'"':'')+'>'+t.e+' '+t.n+'</button>').join('')+
+    ((c.manualA||c.manualE)
+      ? '<span style="width:100%;height:0"></span>'+
+        '<button data-dim="auto" style="border-style:dashed;color:var(--accent-ink)">↺ 자동 판정으로 되돌리기</button>'
+      : '');
 
   $('#mDesc').innerHTML='<b>판정 근거</b> · '+escapeHtml(c.reason||'-')+'<br><br>'+
     '<b>'+E.n+'</b> '+E.desc+'<br><br><b>'+A.n+'</b> '+A.desc;
@@ -1457,27 +1461,59 @@ $('#themeSeg').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(b) setTheme(b.dataset.set);
 });
 $('#exportBtn').addEventListener('click',exportPNG);
-$('#reanalyzeBtn').addEventListener('click',async()=>{
-  if(!chars.length) return;
+/* 전체 다시 분석 — 직접 지정한 분류는 기본적으로 지키고,
+   그 때문에 막힌 게 있으면 알려준 뒤 한 번 더 누르면 그것까지 새로 판정한다 */
+let reAllArmed=false, reAllTimer=null, reAllBusy=false;
+function disarmReAll(){
+  reAllArmed=false; clearTimeout(reAllTimer);
+  const b=$('#reanalyzeBtn');
+  if(b){ b.textContent='전체 다시 분석'; b.style.background=''; b.style.color=''; b.style.borderColor=''; }
+}
+async function reanalyzeAll(force){
   const prog=$('#prog'); prog.classList.add('on');
-  let moved=0;
+  let updated=0, kept=0, failed=0;
   for(let i=0;i<chars.length;i++){
     const c=chars[i];
     prog.textContent='다시 분석 중… '+(i+1)+' / '+chars.length;
     await new Promise(r=>setTimeout(r,0));
-    const cv=await renderCrop(c,256); if(!cv) continue;
-    const a=await analyzeFace(cv.toDataURL('image/jpeg',0.9));
-    if(!a || !a.ok) continue;
-    const before=c.animal+'|'+c.expr;
+    const cv=await renderCrop(c,256);
+    const a=cv ? await analyzeFace(cv.toDataURL('image/jpeg',0.9)) : null;
+    if(!a || !a.ok){ failed++; continue; }
     c.animalRanked=a.animalRanked; c.smilePct=a.smilePct; c.feat=a.feat; c.reason=a.reason;
     c.detected=a.detected; c.eyesFound=a.eyesFound; c.mouthFound=a.mouthFound;
-    if(!c.manualA) c.animal=a.animal;
-    if(!c.manualE) c.expr=a.expr;
-    if(before!==c.animal+'|'+c.expr) moved++;
+    if(force){ c.manualA=false; c.manualE=false; }
+    const before=c.animal+'|'+c.expr;
+    let blocked=false;
+    if(c.manualA){ if(a.animal!==c.animal) blocked=true; } else c.animal=a.animal;
+    if(c.manualE){ if(a.expr!==c.expr) blocked=true; } else c.expr=a.expr;
+    if(before!==c.animal+'|'+c.expr) updated++;
+    else if(blocked) kept++;
   }
   prog.classList.remove('on');
   save(); renderBoard();
-  toast(moved? moved+'명 분류가 바뀌었어요' : '바뀐 분류는 없어요');
+  if(modalId){ const c=cur(); if(c) refreshModalResult(c); }
+  return {updated, kept, failed};
+}
+$('#reanalyzeBtn').addEventListener('click',async e=>{
+  if(!chars.length || reAllBusy) return;
+  const btn=e.currentTarget;
+  const force=reAllArmed;
+  disarmReAll();
+  reAllBusy=true;
+  const r=await reanalyzeAll(force);
+  reAllBusy=false;
+  const tail = r.failed ? ' · '+r.failed+'명은 분석 실패' : '';
+  if(force){
+    toast('직접 지정까지 풀고 '+r.updated+'명 새로 판정했어요'+tail);
+  } else if(r.kept){
+    toast(r.updated+'명 갱신 · '+r.kept+'명은 직접 지정이라 유지했어요. 한 번 더 누르면 이것까지 새로 판정해요'+tail);
+    reAllArmed=true;
+    btn.textContent='직접 지정까지 새로 판정';
+    btn.style.background='var(--accent)'; btn.style.color='#fff'; btn.style.borderColor='transparent';
+    clearTimeout(reAllTimer); reAllTimer=setTimeout(disarmReAll, 6000);
+  } else {
+    toast(r.updated ? r.updated+'명 분류가 바뀌었어요'+tail : '바뀐 분류가 없어요'+tail);
+  }
 });
 $('#clearBtn').addEventListener('click',e=>{
   if(!chars.length) return;
@@ -1498,6 +1534,13 @@ $('#mDel').addEventListener('click',e=>{
 $('#mPick').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   const c=cur(); if(!c) return;
+  if(b.dataset.dim==='auto'){
+    c.manualA=false; c.manualE=false;
+    save(); renderBoard(); refreshModalResult(c);
+    reanalyze(c.id);
+    toast('자동 판정으로 되돌렸어요');
+    return;
+  }
   if(b.dataset.dim==='e'){ c.expr=b.dataset.k; c.manualE=true; }
   else { c.animal=b.dataset.k; c.manualA=true; }
   save(); renderBoard(); refreshModalResult(c);
